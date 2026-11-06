@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Plataforma Cripto Multi-Agente | Análisis e Inversión</title>
+  <!-- Soporte para App Móvil (PWA) -->
+  <meta name="theme-color" content="#0a0e17">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CriptoAgentes">
+  <link rel="manifest" href="/static/manifest.json">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0b0f19',
+              card: '#111827',
+              border: '#1f2937',
+              accent: '#3b82f6',
+              emerald: '#10b981',
+              rose: '#f43f5e',
+              amber: '#f59e0b'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#0a0e17] text-slate-100 font-sans min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            CriptoAgentes AI
+          </h1>
+          <p class="text-xs text-slate-400">Monitor en vivo · Detective de causas · Asesor de inversión</p>
+        </div>
+      </div>
+
+      <!-- ESTADO Y CONTROLES -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Indicador de datos en directo -->
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-medium text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Binance en Vivo</span>
+        </div>
+
+        <!-- Indicador de estado de la IA -->
+        <div id="aiStatusBadge" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-xs font-medium text-blue-400">
+          <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+          <span id="aiStatusText">Verificando IA...</span>
+        </div>
+
+        <!-- Botón de actualización manual -->
+        <button id="refreshBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium transition text-slate-200">
+          <svg id="refreshIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span>Refrescar</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+    <!-- BARRA DE CONFIGURACIÓN DEL UMBRAL -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800/80 rounded-2xl border border-slate-800 p-5 shadow-xl">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">AGENTE 1</span>
+            <h2 class="text-base font-semibold text-white">Disparador de Alerta de Subidas</h2>
+          </div>
+          <p class="text-xs text-slate-400">
+            Define qué porcentaje mínimo de ganancia en 24 horas activa la intervención del Agente Detective y del Asesor.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="flex items-center gap-2 bg-slate-950/80 px-3 py-2 rounded-xl border border-slate-700">
+            <span class="text-xs text-slate-400">Umbral:</span>
+            <input id="thresholdInput" type="number" min="1" max="100" step="0.5" value="5.0"
+              class="w-16 bg-transparent text-center font-bold text-emerald-400 focus:outline-none text-sm">
+            <span class="text-xs font-semibold text-emerald-400">%</span>
+          </div>
+
+          <div class="flex gap-1.5">
+            <button onclick="setThresholdQuick(3)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition">+3%</button>
+            <button onclick="setThresholdQuick(5)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition">+5%</button>
+            <button onclick="setThresholdQuick(8)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition">+8%</button>
+            <button onclick="setThresholdQuick(12)" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition">+12%</button>
+          </div>
+
+          <button id="saveThresholdBtn" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 font-medium text-xs text-white shadow-lg shadow-blue-600/30 transition">
+            Aplicar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: MONEDAS QUE DISPARARON LA ALARMA (AGENTE 1) -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>
+          <h2 class="text-lg font-bold text-white tracking-wide">
+            Criptomonedas en Alerta Alcista
+          </h2>
+          <span id="alertsCountBadge" class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            0 detectadas
+          </span>
+        </div>
+        <span class="text-xs text-slate-400 hidden sm:inline">Haz clic en <strong>Investigar</strong> para activar los 3 agentes</span>
+      </div>
+
+      <!-- Grid de tarjetas de alertas -->
+      <div id="alertsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- Renderizado dinámicamente con JavaScript -->
+        <div class="col-span-full py-12 text-center text-slate-400">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent mb-3"></div>
+          <p class="text-sm">Analizando precios en tiempo real con Binance...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: ESPACIO DE TRABAJO DE LOS 3 AGENTES (INFORME DETALLADO) -->
+    <section id="analysisSection" class="hidden scroll-mt-20">
+      <div class="bg-slate-900 rounded-3xl border border-blue-500/30 p-6 md:p-8 shadow-2xl relative overflow-hidden">
+        <!-- Resplandor de fondo -->
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Encabezado del reporte -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+          <div class="flex items-center gap-4">
+            <div id="reportCryptoIcon" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-xl font-extrabold text-white shadow-xl">
+              --
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 id="reportCryptoName" class="text-2xl font-bold text-white">--</h3>
+                <span id="reportCryptoSymbol" class="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">--</span>
+              </div>
+              <div class="flex items-center gap-3 mt-1 text-sm text-slate-400">
+                <span>Precio actual: <strong id="reportCryptoPrice" class="text-white">--</strong></span>
+                <span>•</span>
+                <span>Subida 24h: <strong id="reportCryptoChange" class="text-emerald-400 font-bold">--</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="closeAnalysis()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 hover:text-white transition">
+              Cerrar Informe ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Estado del pipeline de agentes -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+          
+          <!-- TARJETA AGENTE 1 -->
+          <div class="bg-slate-950/70 rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">AGENTE 1</span>
+              <span class="text-[11px] text-slate-400 font-medium">Monitor de Mercado</span>
+            </div>
+            <div class="space-y-2">
+              <div class="text-xs text-slate-400">Diagnóstico técnico:</div>
+              <div id="a1StatusMsg" class="text-sm font-semibold text-slate-200">Calculando...</div>
+              <div class="pt-2 border-t border-slate-800/80 text-xs flex justify-between text-slate-400">
+                <span>Volatilidad: <strong id="a1Volatility" class="text-slate-200">--</strong></span>
+                <span>Volumen: <strong id="a1Volume" class="text-slate-200">--</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA AGENTE 2 -->
+          <div class="bg-slate-950/70 rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">AGENTE 2</span>
+              <span class="text-[11px] text-slate-400 font-medium">Detective de Causas</span>
+            </div>
+            <div class="space-y-2">
+              <div class="text-xs text-slate-400">Factor principal identificado:</div>
+              <div id="a2Factor" class="text-sm font-semibold text-purple-300">Investigando titulares...</div>
+              <div class="pt-2 border-t border-slate-800/80 text-xs flex justify-between text-slate-400">
+                <span>Catalizador: <strong id="a2Type" class="text-slate-200">--</strong></span>
+                <span>Sentimiento: <strong id="a2Sentiment" class="text-slate-200">--</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA AGENTE 3 -->
+          <div class="bg-slate-950/70 rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">AGENTE 3</span>
+              <span class="text-[11px] text-slate-400 font-medium">Especialista en Inversión</span>
+            </div>
+            <div class="space-y-2">
+              <div class="text-xs text-slate-400">Veredicto de compra:</div>
+              <div id="a3VerdictBadge" class="text-sm font-bold text-white px-2.5 py-1 rounded-lg inline-block bg-slate-800">
+                Evaluando...
+              </div>
+              <div class="pt-2 border-t border-slate-800/80 text-xs flex justify-between text-slate-400">
+                <span>Riesgo: <strong id="a3RiskLevel" class="text-slate-200">--</strong></span>
+                <span>Momento de entrada: <strong id="a3Timing" class="text-slate-200">En revisión</strong></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CUERPO DETALLADO DEL INFORME -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+          
+          <!-- COLUMNA IZQUIERDA: DETECTIVE DE CAUSAS Y NOTICIAS (AGENTE 2) -->
+          <div class="lg:col-span-7 space-y-6">
+            <div class="bg-slate-950/50 rounded-2xl p-5 border border-slate-800/80 space-y-3">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🔎</span>
+                <h4 class="text-base font-bold text-white">¿Por qué ha subido? Informe del Agente Detective</h4>
+              </div>
+              <p id="a2Explanation" class="text-sm text-slate-300 leading-relaxed">
+                Buscando y contrastando noticias recientes...
+              </p>
+            </div>
+
+            <!-- Noticias reales consultadas -->
+            <div class="bg-slate-950/50 rounded-2xl p-5 border border-slate-800/80 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">📰</span>
+                  <h4 class="text-sm font-bold text-white">Noticias y Titulares Contrastados</h4>
+                </div>
+                <span class="text-xs text-slate-500">Fuentes en directo</span>
+              </div>
+              
+              <div id="newsListContainer" class="space-y-2.5">
+                <!-- Noticias inyectadas dinámicamente -->
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUMNA DERECHA: CONSEJO DEL ESPECIALISTA (AGENTE 3) -->
+          <div class="lg:col-span-5 space-y-6">
+            
+            <div class="bg-gradient-to-br from-slate-950 to-slate-900 rounded-2xl p-5 border border-slate-800 space-y-4">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🎯</span>
+                <h4 class="text-base font-bold text-white">Veredicto y Recomendación de Inversión</h4>
+              </div>
+
+              <!-- Consejo final para el usuario -->
+              <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+                <div class="text-xs font-semibold text-slate-400 mb-1">CONSEJO DIRECTO AL INVERSOR:</div>
+                <p id="a3FinalAdvice" class="text-sm text-slate-200 leading-relaxed font-medium">
+                  Esperando el análisis integral...
+                </p>
+              </div>
+
+              <!-- Estrategia sugerida -->
+              <div class="space-y-1">
+                <div class="text-xs font-semibold text-slate-400">Estrategia recomendada:</div>
+                <p id="a3Strategy" class="text-xs text-slate-300 leading-relaxed">
+                  --
+                </p>
+              </div>
+
+              <!-- Puntos a favor y riesgos -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div class="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/20">
+                  <div class="text-xs font-bold text-emerald-400 mb-1.5 flex items-center gap-1">
+                    <span>✓</span> Puntos a Favor
+                  </div>
+                  <ul id="a3ProsList" class="text-[11px] text-slate-300 space-y-1 list-disc list-inside">
+                    <!-- Dinámico -->
+                  </ul>
+                </div>
+
+                <div class="p-3 rounded-xl bg-rose-950/30 border border-rose-500/20">
+                  <div class="text-xs font-bold text-rose-400 mb-1.5 flex items-center gap-1">
+                    <span>⚠</span> Riesgos Latentes
+                  </div>
+                  <ul id="a3ConsList" class="text-[11px] text-slate-300 space-y-1 list-disc list-inside">
+                    <!-- Dinámico -->
+                  </ul>
+                </div>
+              </div>
+
+              <p class="text-[11px] text-slate-500 italic text-center pt-2 border-t border-slate-800">
+                Nota: Esta herramienta ofrece orientación analítica con IA y datos de mercado. Las criptomonedas conllevan riesgo; nunca inviertas dinero que no puedas permitirte perder.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: MERCADO COMPLETO EN TIEMPO REAL -->
+    <section class="space-y-4 pt-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold text-white tracking-wide">
+            Mercado Cripto en Tiempo Real
+          </h2>
+          <p class="text-xs text-slate-400">Listado de las principales criptomonedas ordenadas por volumen real</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="relative w-full sm:w-64">
+            <input id="searchInput" type="text" placeholder="Buscar por nombre o símbolo..."
+              class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+            <span class="absolute right-3 top-2.5 text-slate-500 text-xs">🔍</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla interactiva -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/70 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-semibold">
+              <tr>
+                <th class="py-3 px-4">#</th>
+                <th class="py-3 px-4">Activo</th>
+                <th class="py-3 px-4 text-right">Precio Actual</th>
+                <th class="py-3 px-4 text-right">Variación 24h</th>
+                <th class="py-3 px-4 text-right hidden md:table-cell">Volumen 24h (USDT)</th>
+                <th class="py-3 px-4 text-right hidden sm:table-cell">Máximo / Mínimo 24h</th>
+                <th class="py-3 px-4 text-center">Acción de Agentes</th>
+              </tr>
+            </thead>
+            <tbody id="marketTableBody" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Filas renderizadas con JavaScript -->
+              <tr>
+                <td colspan="7" class="py-8 text-center text-slate-500">Cargando cotizaciones de mercado...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>Plataforma Cripto Multi-Agente • Conexión nativa con datos de mercado reales</div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <span>Agente 1: Monitor</span>
+        <span>•</span>
+        <span>Agente 2: Investigador</span>
+        <span>•</span>
+        <span>Agente 3: Especialista</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
